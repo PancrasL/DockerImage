@@ -1,0 +1,9 @@
+FROM registry.cn-hangzhou.aliyuncs.com/pancraslv/kubeless-python37:base
+
+WORKDIR /
+ADD kubeless.py .
+
+USER 1000
+
+ENV PYTHONUNBUFFERED 1
+CMD ["python", "/kubeless.py"]
