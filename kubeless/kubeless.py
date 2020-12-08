@@ -14,6 +14,8 @@ import json
 import ahttp
 import asyncio
 
+bottle.BaseRequest.MEMFILE_MAX = 1,073,741,824 #1024*1024*1024
+
 mod = imp.load_source('function',
                       '/kubeless/%s.py' % os.getenv('MOD_NAME'))
 func = getattr(mod, os.getenv('FUNC_HANDLER'))
