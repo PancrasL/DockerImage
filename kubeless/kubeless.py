@@ -60,27 +60,16 @@ def metrics():
 
 @app.route('/<:re:.*>', method=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
-    # 在当前线程创建协程的事件循环
-    asyncio.set_event_loop(asyncio.new_event_loop())
-
     req = bottle.request
 
     ndp_type = req.forms.get('ndp_type')
 
     # 如果是GET请求，则通过proxy_link获取对象数据
     if ndp_type == 'GET':
-        obj_urls = json.loads(req.forms.get('proxy_link'))
-
-        # 发送head请求，获取对象的元数据
-        head_requests = [ahttp.head(url) for url in obj_urls]
-        head_responses = ahttp.run(head_requests)
-
-        # 按照时间戳进行降序排序，以获取最新的对象
-        head_responses = sorted(head_responses, key=lambda k: float(
-            k.headers['X-Timestamp']), reverse=True)
+        obj_url = req.forms.get('proxy_link')
 
         # 获取最新的对象数据
-        get_response = requests.get(head_responses[0].url)
+        get_response = requests.get(obj_url)
         data = get_response.content
     elif ndp_type == 'PUT':
         data = req.forms.get('obj_data')
@@ -114,6 +103,9 @@ def handler():
                 if isinstance(res, Exception):
                     raise res
                 if ndp_type == 'PUT':
+                    # 在当前线程创建协程的事件循环
+                    asyncio.set_event_loop(asyncio.new_event_loop())
+
                     headers = json.loads(req.forms.get('headers'))
                     obj_urls = json.loads(req.forms.get('proxy_link'))
                     index = 0
